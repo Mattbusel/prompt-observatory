@@ -15,9 +15,33 @@ When you are tuning a prompt you usually juggle three questions: what did the mo
 
 Models in the dropdown: `claude-sonnet-4-6`, `claude-opus-4-6`, `claude-haiku-4-5`, `gpt-4o`, `gpt-4o-mini`. Names starting with `claude` go to Anthropic, `gpt`, `o1` and `o3` go to OpenAI.
 
-## Quick start
+## Download (no Python needed)
 
-Python 3.10+. Not published on PyPI; install from source.
+Grab the app from the [latest release](https://github.com/Mattbusel/prompt-observatory/releases/latest):
+
+| OS | File |
+| --- | --- |
+| Windows | `prompt-observatory-vX.Y.Z-windows-x86_64.zip` |
+| macOS, Apple Silicon | `prompt-observatory-vX.Y.Z-macos-arm64.tar.gz` |
+| macOS, Intel | `prompt-observatory-vX.Y.Z-macos-x86_64.tar.gz` |
+| Linux | `prompt-observatory-vX.Y.Z-linux-x86_64.tar.gz` |
+
+Unzip it and run `prompt-observatory` (double-click `prompt-observatory.exe` on Windows). A console window opens, prints the local address (`http://127.0.0.1:7860`) and your browser opens the dashboard. Keep that window open while you use it; close it to stop. Paste an Anthropic or OpenAI API key into the dashboard, or set `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` before starting it. The first start takes a little longer while it unpacks.
+
+The binaries are unsigned. Windows SmartScreen may say "unknown publisher": click **More info**, then **Run anyway**. On macOS, right-click the binary and choose **Open** the first time, or run `xattr -d com.apple.quarantine prompt-observatory`.
+
+## Install with pipx
+
+Not published on PyPI; install straight from GitHub:
+
+```bash
+pipx install git+https://github.com/Mattbusel/prompt-observatory
+observatory
+```
+
+## From source
+
+Python 3.10+.
 
 ```bash
 git clone https://github.com/Mattbusel/prompt-observatory
@@ -30,7 +54,7 @@ observatory                             # or: python -m observatory
 
 Open http://127.0.0.1:7860. You can also paste a key into the API key field in the UI.
 
-Options: `--port 7860`, `--host 127.0.0.1`, `--share` (Gradio public link), `--api-key KEY` (sets `ANTHROPIC_API_KEY` if unset).
+Options: `--port 7860`, `--host 127.0.0.1`, `--share` (Gradio public link), `--api-key KEY` (sets `ANTHROPIC_API_KEY` if unset), `--open` / `--no-open` (open a browser; the prebuilt app opens one by default), `--version`.
 
 Run the tests (no API key needed):
 
