@@ -1,4 +1,4 @@
-"""OpenAI provider — async token stream adapter."""
+"""OpenAI provider: async token stream adapter."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """
-Hallucination scorer — flags tokens and spans with confidence signals.
+Hallucination scorer: flags tokens and spans with confidence signals.
 
 Inspired by LLM-Hallucination-Detection-Script
 (github.com/Mattbusel/LLM-Hallucination-Detection-Script).
@@ -15,10 +15,10 @@ from .stream import StreamSession, TokenEvent
 
 
 class FlagType(str, Enum):
-    HIGH_LATENCY = "high_latency"       # Model hesitated — uncertainty signal
+    HIGH_LATENCY = "high_latency"       # Model hesitated: uncertainty signal
     HEDGE_PHRASE = "hedge_phrase"        # "I think", "probably", "might be"
     NUMERIC_CLAIM = "numeric_claim"      # Numbers/dates that could be hallucinated
-    ENTITY_CLAIM = "entity_claim"        # Proper nouns — high hallucination risk
+    ENTITY_CLAIM = "entity_claim"        # Proper nouns: high hallucination risk
     CONTRADICTION = "contradiction"      # Repeats then contradicts earlier text
 
 
@@ -75,7 +75,9 @@ class HallucinationScorer:
         numeric_confidence: float = 0.45,
         entity_confidence: float = 0.35,
         hedge_confidence: float = 0.30,
+        min_pause_ms: float = 120.0,
     ) -> None:
+        self._min_pause_ms = min_pause_ms
         self._latency_threshold = latency_threshold
         self._numeric_confidence = numeric_confidence
         self._entity_confidence = entity_confidence
@@ -84,17 +86,35 @@ class HallucinationScorer:
     def score(self, session: StreamSession) -> HallucinationReport:
         flags: list[TokenFlag] = []
 
-        # Pass 1: per-token latency flags
-        for token in session.tokens:
-            if token.latency_signal >= self._latency_threshold:
-                flags.append(TokenFlag(
-                    token_index=token.index,
-                    flag_type=FlagType.HIGH_LATENCY,
-                    confidence=token.latency_signal,
-                    explanation=f"High generation latency (signal={token.latency_signal:.2f})",
-                ))
+        # Pass 1: per-token latency flags.
+        # With real timings (latency_ms), a chunk counts as a pause only when the
+        # model waited both min_pause_ms and 4x the run's median gap, so a fast,
+        # even stream is not flagged just because one chunk was the slowest of
+        # its neighbours. The first chunk (time to first token) is not a pause.
+        gaps = [t.latency_ms for t in session.tokens[1:]]
+        if any(g > 0 for g in gaps):
+            median = sorted(gaps)[len(gaps) // 2]
+            floor = max(self._min_pause_ms, 4 * median)
+            for token in session.tokens[1:]:
+                if token.latency_ms >= floor and token.latency_signal >= self._latency_threshold:
+                    flags.append(TokenFlag(
+                        token_index=token.index,
+                        flag_type=FlagType.HIGH_LATENCY,
+                        confidence=token.latency_signal,
+                        explanation=(f"Paused {token.latency_ms:.0f} ms before "
+                                     f"'{token.text.strip()[:40]}' (median gap {median:.0f} ms)"),
+                    ))
+        else:
+            for token in session.tokens:
+                if token.latency_signal >= self._latency_threshold:
+                    flags.append(TokenFlag(
+                        token_index=token.index,
+                        flag_type=FlagType.HIGH_LATENCY,
+                        confidence=token.latency_signal,
+                        explanation=f"High generation latency (signal={token.latency_signal:.2f})",
+                    ))
 
-        # Pass 2: full-text linguistic flags — map back to token spans
+        # Pass 2: full-text linguistic flags: map back to token spans
         full_text = session.full_text
         token_starts = self._build_token_offsets(session.tokens)
 

@@ -25,4 +25,5 @@ jobs:
       - name: The dashboard builds and the CLI answers
         run: |
           observatory --version
+          prompt-observatory --version
           python -c "from observatory.app import build_ui; build_ui(); print('UI builds')"

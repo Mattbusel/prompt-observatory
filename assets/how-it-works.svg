@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 250" width="880" height="250" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <title>How Prompt Observatory works</title>
+  <style>
+    .bg{fill:#f6f3ec;stroke:#e2dccf}
+    .box{fill:#fffdf8;stroke:#cfc7b6;stroke-width:1.2}
+    .hot{fill:#fff4e0;stroke:#d9891c;stroke-width:1.4}
+    .t{fill:#1c2230;font-size:14px;font-weight:600}
+    .s{fill:#6b6f78;font-size:12px}
+    .m{fill:#6b6f78;font-size:11px;font-family:ui-monospace,'Cascadia Mono',Menlo,Consolas,monospace}
+    .ln{stroke:#8a8f98;stroke-width:1.4;fill:none;marker-end:url(#a)}
+    .ah{fill:#8a8f98}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#0e1116;stroke:#28303a}.box{fill:#151a21;stroke:#353e4a}.hot{fill:#2a2213;stroke:#f0a830}
+      .t{fill:#e8e4da}.s,.m{fill:#9097a1}.ln{stroke:#6d7580}.ah{fill:#6d7580}
+    }
+  </style>
+  <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L8,4 L0,8 z"/></marker></defs>
+  <rect class="bg" x="0.5" y="0.5" width="879" height="249" rx="12"/>
+  <rect class="box" x="24" y="96" width="120" height="58" rx="8"/>
+  <text class="t" x="84" y="122" text-anchor="middle">Your prompt</text>
+  <text class="s" x="84" y="140" text-anchor="middle">typed in the page</text>
+
+  <rect class="box" x="196" y="22" width="190" height="62" rx="8"/>
+  <text class="t" x="291" y="47" text-anchor="middle">Cost analyzer</text>
+  <text class="m" x="291" y="66" text-anchor="middle">core/cost.py, no API call</text>
+
+  <rect class="box" x="196" y="140" width="190" height="62" rx="8"/>
+  <text class="t" x="291" y="165" text-anchor="middle">Provider stream</text>
+  <text class="m" x="291" y="184" text-anchor="middle">Claude, GPT or Ollama</text>
+
+  <rect class="hot" x="430" y="140" width="190" height="62" rx="8"/>
+  <text class="t" x="525" y="165" text-anchor="middle">Interceptor</text>
+  <text class="m" x="525" y="184" text-anchor="middle">timestamps every chunk</text>
+
+  <rect class="box" x="664" y="140" width="190" height="62" rx="8"/>
+  <text class="t" x="759" y="165" text-anchor="middle">Scorer</text>
+  <text class="m" x="759" y="184" text-anchor="middle">pauses, numbers, names</text>
+
+  <rect class="box" x="664" y="22" width="190" height="62" rx="8"/>
+  <text class="t" x="759" y="47" text-anchor="middle">The page</text>
+  <text class="m" x="759" y="66" text-anchor="middle">cost, stream, flags, JSON</text>
+
+  <path class="ln" d="M144,112 C170,112 170,53 194,53"/>
+  <path class="ln" d="M144,138 C170,138 170,171 194,171"/>
+  <path class="ln" d="M386,171 L428,171"/>
+  <path class="ln" d="M620,171 L662,171"/>
+  <path class="ln" d="M386,53 L662,53"/>
+  <path class="ln" d="M525,140 C525,100 700,110 740,86"/>
+  <path class="ln" d="M759,140 L759,86"/>
+  <text class="s" x="524" y="44" text-anchor="middle">updates as you type</text>
+  <text class="s" x="560" y="112" text-anchor="middle">live, while it streams</text>
+</svg>

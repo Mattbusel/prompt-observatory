@@ -1,5 +1,5 @@
 """
-Token stream interceptor — captures token-level data from LLM streams.
+Token stream interceptor: captures token-level data from LLM streams.
 
 Inspired by Every-Other-Token (github.com/Mattbusel/Every-Other-Token).
 """
@@ -22,6 +22,9 @@ class TokenEvent:
     # High latency = model is "thinking harder" = higher perplexity signal.
     latency_signal: float = 0.0
     cumulative_text: str = ""
+    # Raw milliseconds since the previous chunk (for the first chunk: since the
+    # request started, i.e. time to first token).
+    latency_ms: float = 0.0
 
 
 @dataclass
@@ -104,6 +107,7 @@ class TokenStreamInterceptor:
                 timestamp_ms=now,
                 latency_signal=self._latency_signal(latency_ms),
                 cumulative_text=cumulative,
+                latency_ms=latency_ms,
             )
             session.tokens.append(event)
             index += 1
