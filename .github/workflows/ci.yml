@@ -6,12 +6,23 @@ on:
     branches: [ main, master ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || pip install pytest 2>/dev/null || true
-      - run: pytest --tb=short -q || echo "no tests"
-
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Tests
+        run: python -m pytest --tb=short -q
+      - name: The dashboard builds and the CLI answers
+        run: |
+          observatory --version
+          python -c "from observatory.app import build_ui; build_ui(); print('UI builds')"

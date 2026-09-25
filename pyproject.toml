@@ -7,7 +7,7 @@ packages = ["observatory"]
 
 [project]
 name = "prompt-observatory"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unified LLM interpretability dashboard — token streams, hallucination scoring, and prompt cost analysis"
 readme = "README.md"
 license = { text = "MIT" }

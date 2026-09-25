@@ -12,8 +12,10 @@ from __future__ import annotations
 import argparse
 import asyncio
 import os
+import sys
 from typing import Iterator
 
+from . import __version__
 from .core.cost import PromptCostAnalyzer
 from .core.hallucination import HallucinationScorer
 from .core.stream import StreamSession, TokenStreamInterceptor
@@ -121,17 +123,42 @@ def _cost_md(report) -> str:
     return "\n".join(lines)
 
 
+def _gradio_major(gr) -> int:  # type: ignore[no-untyped-def]
+    try:
+        return int(str(gr.__version__).split(".")[0])
+    except (AttributeError, ValueError):
+        return 0
+
+
+def _style_kwargs(gr) -> dict:  # type: ignore[no-untyped-def,type-arg]
+    return {
+        "theme": gr.themes.Soft(),
+        "css": ".token-stream { font-family: monospace; line-height: 2; }",
+    }
+
+
+def _use_bundled_encodings() -> None:
+    """Point tiktoken at the encodings shipped inside the prebuilt executable.
+
+    tiktoken normally downloads them on first use; the release binaries carry
+    them so token counting works offline. A user-set TIKTOKEN_CACHE_DIR wins.
+    """
+    base = getattr(sys, "_MEIPASS", None)
+    if base and "TIKTOKEN_CACHE_DIR" not in os.environ:
+        cache = os.path.join(base, "tiktoken_cache")
+        if os.path.isdir(cache):
+            os.environ["TIKTOKEN_CACHE_DIR"] = cache
+
+
 def build_ui():
     try:
         import gradio as gr  # type: ignore[import]
     except ImportError as exc:
         raise ImportError("Run: pip install gradio") from exc
 
-    with gr.Blocks(
-        title="Prompt Observatory",
-        theme=gr.themes.Soft(),
-        css=".token-stream { font-family: monospace; line-height: 2; }",
-    ) as demo:
+    # Gradio 6 moved theme and css from Blocks() to launch().
+    style = {} if _gradio_major(gr) >= 6 else _style_kwargs(gr)
+    with gr.Blocks(title="Prompt Observatory", **style) as demo:
         gr.Markdown(
             "# 🔭 Prompt Observatory\n"
             "> Unified LLM interpretability — token streams · hallucination scoring · cost analysis\n\n"
@@ -190,7 +217,7 @@ def build_ui():
             export_out = gr.Code(label="Export JSON", language="json", visible=False)
             export_btn = gr.Button("📥 Show Export JSON")
 
-        export_btn.click(fn=lambda x: gr.update(visible=True), inputs=[], outputs=[export_out])
+        export_btn.click(fn=lambda: gr.update(visible=True), inputs=[], outputs=[export_out])
 
         async def on_run(prompt, model, api_key, max_tokens):
             stream_html, halluc_md, cost_md, export_json = await _run_analysis(
@@ -207,19 +234,48 @@ def build_ui():
     return demo
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Prompt Observatory")
+def main(argv: list[str] | None = None) -> None:
+    frozen = bool(getattr(sys, "frozen", False))
+    parser = argparse.ArgumentParser(
+        prog="observatory",
+        description="Prompt Observatory: a local dashboard that streams a Claude or GPT "
+                    "response, flags risky spans and prices the prompt.",
+    )
     parser.add_argument("--port", type=int, default=7860)
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--share", action="store_true")
-    parser.add_argument("--api-key", default="")
-    args = parser.parse_args()
+    parser.add_argument("--share", action="store_true", help="create a public Gradio link")
+    parser.add_argument("--api-key", default="", help="sets ANTHROPIC_API_KEY if unset")
+    browser = parser.add_mutually_exclusive_group()
+    browser.add_argument("--open", dest="open_browser", action="store_true", default=frozen,
+                         help="open the dashboard in your browser"
+                              + (" (default for the prebuilt app)" if frozen else ""))
+    browser.add_argument("--no-open", dest="open_browser", action="store_false",
+                         help="do not open a browser")
+    parser.add_argument("--version", action="version", version=f"prompt-observatory {__version__}")
+    args = parser.parse_args(argv)
 
     if args.api_key:
         os.environ.setdefault("ANTHROPIC_API_KEY", args.api_key)
 
+    _use_bundled_encodings()
+    os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
+
+    import gradio as gr  # type: ignore[import]
+
+    url = f"http://{'127.0.0.1' if args.host in ('0.0.0.0', '::') else args.host}:{args.port}"
+    print(f"Prompt Observatory {__version__}")
+    print(f"Starting the dashboard at {url}")
+    print("Leave this window open while you use it. Press Ctrl+C to stop.", flush=True)
+
     demo = build_ui()
-    demo.launch(server_name=args.host, server_port=args.port, share=args.share)
+    launch_kwargs = _style_kwargs(gr) if _gradio_major(gr) >= 6 else {}
+    demo.launch(
+        server_name=args.host,
+        server_port=args.port,
+        share=args.share,
+        inbrowser=args.open_browser,
+        **launch_kwargs,
+    )
 
 
 if __name__ == "__main__":

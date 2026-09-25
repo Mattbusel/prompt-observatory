@@ -96,7 +96,7 @@ class PromptCostAnalyzer:
 
     def count_tokens(self, text: str) -> int:
         if self._tokenizer is not None:
-            return len(self._tokenizer.encode(text))
+            return len(self._tokenizer.encode(text, disallowed_special=()))
         # Fallback: ~4 chars per token heuristic
         return max(1, len(text) // 4)
 
