@@ -20,9 +20,14 @@
 
 | You have | Run this |
 | --- | --- |
-| Python and pipx (any OS) | `pipx install git+https://github.com/Mattbusel/prompt-observatory` |
-| Windows, no Python | Download `prompt-observatory-vX.Y.Z-windows-x86_64.zip` from [Releases](https://github.com/Mattbusel/prompt-observatory/releases/latest), unzip, double-click `prompt-observatory.exe` |
-| macOS or Linux, no Python | Download the `macos-arm64`, `macos-x86_64` or `linux-x86_64` `.tar.gz` from [Releases](https://github.com/Mattbusel/prompt-observatory/releases/latest), then run `./prompt-observatory` |
+| Windows (PowerShell) | `irm https://raw.githubusercontent.com/Mattbusel/prompt-observatory/master/install.ps1 \| iex` |
+| Windows with [Scoop](https://scoop.sh) | `scoop bucket add mattbusel https://github.com/Mattbusel/scoop-bucket; scoop install mattbusel/prompt-observatory` |
+| macOS or Linux | `curl -fsSL https://raw.githubusercontent.com/Mattbusel/prompt-observatory/master/install.sh \| sh` |
+| macOS or Linux with Homebrew | `brew install mattbusel/tap/prompt-observatory` |
+| Python 3.10+ and pipx | `pipx install git+https://github.com/Mattbusel/prompt-observatory` |
+| Nothing, just a download | [Releases](https://github.com/Mattbusel/prompt-observatory/releases/latest): Windows `.zip`, macOS `arm64` / `x86_64` and Linux `x86_64` `.tar.gz`; unzip and run `prompt-observatory` |
+
+The scripts download the release for your system, check its SHA-256 against the release's `SHA256SUMS.txt`, and put one file in `~/.local/bin` (macOS/Linux) or `%LOCALAPPDATA%\Programs\prompt-observatory` (Windows, added to your PATH).
 
 The prebuilt apps are one file of about 95 MB (Python and the web UI are inside). They are unsigned: on Windows click **More info**, then **Run anyway**; on macOS right-click it and choose **Open** the first time. It is not on PyPI.
 
