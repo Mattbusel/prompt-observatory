@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: Mattbusel.PromptObservatory
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Mattbusel
+PublisherUrl: https://github.com/Mattbusel
+PublisherSupportUrl: https://github.com/Mattbusel/prompt-observatory/issues
+PackageName: Prompt Observatory
+PackageUrl: https://github.com/Mattbusel/prompt-observatory
+License: MIT
+LicenseUrl: https://github.com/Mattbusel/prompt-observatory/blob/master/LICENSE
+ShortDescription: "Local dashboard that streams an LLM reply and flags claims worth checking"
+Description: "A local web dashboard: streams a reply from Claude, GPT or a local Ollama model chunk by chunk, charts the gap before every chunk, flags numbers, dates, names and hedges worth a second look, and prices the prompt as you type."
+Tags:
+- llm
+- prompt
+- ollama
+- claude
+- dashboard
+ReleaseNotesUrl: https://github.com/Mattbusel/prompt-observatory/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
