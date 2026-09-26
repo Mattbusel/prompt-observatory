@@ -1,10 +1,10 @@
-"""Session export — JSON and HTML report generation."""
+"""Session export: JSON and HTML report generation."""
 
 from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..core.hallucination import HallucinationReport
 from ..core.cost import CostReport
@@ -19,7 +19,7 @@ def to_json(
     """Export a complete observatory session as JSON."""
     return json.dumps(
         {
-            "exported_at": datetime.utcnow().isoformat(),
+            "exported_at": datetime.now(timezone.utc).isoformat(),
             "session": {
                 "prompt": session.prompt,
                 "model": session.model,
@@ -104,7 +104,7 @@ th{{background:#2a2a2a}} .score-low{{color:#4caf50}} .score-med{{color:#ff9800}}
 
 <h2>Hallucination Analysis
   <span class="score-{'low' if hallucination.risk_level=='low' else 'med' if hallucination.risk_level=='medium' else 'high'}">
-    [{hallucination.risk_level.upper()} RISK — {hallucination.overall_score:.2%}]
+    [{hallucination.risk_level.upper()} RISK, {hallucination.overall_score:.2%}]
   </span>
 </h2>
 <table><tr><th>Token #</th><th>Flag Type</th><th>Confidence</th><th>Explanation</th></tr>

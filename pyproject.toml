@@ -7,8 +7,8 @@ packages = ["observatory"]
 
 [project]
 name = "prompt-observatory"
-version = "0.2.0"
-description = "Unified LLM interpretability dashboard — token streams, hallucination scoring, and prompt cost analysis"
+version = "0.3.0"
+description = "Local dashboard that streams a Claude, GPT or local Ollama reply chunk by chunk, flags spans worth checking and prices the prompt"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
@@ -45,6 +45,7 @@ dev = [
 
 [project.scripts]
 observatory = "observatory.app:main"
+prompt-observatory = "observatory.app:main"
 
 [project.urls]
 Homepage = "https://github.com/Mattbusel/prompt-observatory"

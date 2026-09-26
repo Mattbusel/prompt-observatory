@@ -1,5 +1,5 @@
 """
-Prompt cost analyzer — token counts, API cost estimates, compression suggestions.
+Prompt cost analyzer: token counts, API cost estimates, compression suggestions.
 
 Inspired by Token-Visualizer (github.com/Mattbusel/Token-Visualizer).
 """
@@ -9,13 +9,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-# Approximate costs per 1M tokens (input / output) as of early 2026.
-# Update these as pricing changes.
+# List prices in USD per 1M tokens (input / output), checked 2026-09-25.
+# Update these as pricing changes. Local Ollama models cost nothing per token.
 _PRICING: dict[str, tuple[float, float]] = {
     # model_id: (input_per_1m, output_per_1m)
-    "claude-opus-4-6":    (15.00, 75.00),
+    "claude-opus-5":      (5.00,  25.00),
+    "claude-sonnet-5":    (2.00,  10.00),
+    "claude-opus-4-6":    (5.00,  25.00),
     "claude-sonnet-4-6":  (3.00,  15.00),
-    "claude-haiku-4-5":   (0.25,   1.25),
+    "claude-haiku-4-5":   (1.00,   5.00),
     "gpt-4o":             (5.00,  15.00),
     "gpt-4o-mini":        (0.15,   0.60),
     "gpt-4-turbo":        (10.00, 30.00),
@@ -31,6 +33,13 @@ _VERBOSE_PHRASES = [
     (r"\bin the event that\b", "if"),
     (r"\bwith regard to\b", "regarding"),
 ]
+
+
+def price_for(model: str) -> tuple[float, float]:
+    """(input, output) USD per 1M tokens. Local models are free; unknown ones use (5, 15)."""
+    if model.startswith("ollama/"):
+        return (0.0, 0.0)
+    return _PRICING.get(model, (5.0, 15.0))
 
 
 @dataclass
@@ -66,7 +75,7 @@ class CostReport:
 
     @property
     def potential_savings_usd(self) -> float:
-        model_pricing = _PRICING.get(self.model, (5.0, 15.0))
+        model_pricing = price_for(self.model)
         return self.potential_savings_tokens * model_pricing[0] / 1_000_000
 
 
@@ -106,7 +115,7 @@ class PromptCostAnalyzer:
         estimated_output_tokens: int = 512,
     ) -> CostReport:
         input_tokens = self.count_tokens(prompt)
-        pricing = _PRICING.get(self.model, (5.0, 15.0))
+        pricing = price_for(self.model)
         input_cost = input_tokens * pricing[0] / 1_000_000
         output_cost = estimated_output_tokens * pricing[1] / 1_000_000
 
